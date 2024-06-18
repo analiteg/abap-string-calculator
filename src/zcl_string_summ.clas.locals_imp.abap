@@ -101,7 +101,7 @@ CLASS lcl_string_culc IMPLEMENTATION.
           lv_length -= 1.
 
         ENDWHILE.
-      CATCH cx_root INTO DATA(lr_exc). " TODO: variable is assigned but never used (ABAP cleaner)
+      CATCH cx_root INTO DATA(lr_exc).
         str_summ = 'error'.
     ENDTRY.
 
