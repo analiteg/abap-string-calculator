@@ -75,18 +75,6 @@ CLASS lcl_string_culc IMPLEMENTATION.
                               ev_str_2 = DATA(ev_string_2) ).
 
     DATA(lv_length) = strlen( ev_string_1 ) - 1.
-    DATA lt_numbers TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
-
-    lt_numbers = VALUE #( ( `0` )
-                          ( `1` )
-                          ( `2` )
-                          ( `3` )
-                          ( `4` )
-                          ( `5` )
-                          ( `6` )
-                          ( `7` )
-                          ( `8` )
-                          ( `9` ) ).
     CLEAR buf.
     TRY.
         WHILE lv_length >= 0.
@@ -94,31 +82,28 @@ CLASS lcl_string_culc IMPLEMENTATION.
           DATA(i_1) = CONV i( ev_string_1+lv_length(1) ).
           DATA(i_2) = CONV i( ev_string_2+lv_length(1) ).
 
+          DATA(summ) = i_1 + i_2 + numb.
 
+          IF ( summ ) < 10.
+            DATA(summ_str) = CONV string( summ ).
+            DATA(str_summ) = insert( val = buf
+                                     sub = summ_str ).
+            buf = str_summ.
+            numb = 0.
+          ELSE.
+            summ_str = ( summ ) MOD 10.
+            str_summ = insert( val = buf
+                               sub = summ_str ).
+            buf = str_summ.
+            numb = 1.
+          ENDIF.
 
-            DATA(summ) = i_1 + i_2 + numb.
-
-            IF ( summ ) < 10.
-              DATA(summ_str) = CONV string( summ ).
-              DATA(str_summ) = insert( val = buf
-                                       sub = summ_str ).
-              buf = str_summ.
-              numb = 0.
-            ELSE.
-              summ_str = ( summ ) MOD 10.
-              str_summ = insert( val = buf
-                                 sub = summ_str ).
-              buf = str_summ.
-              numb = 1.
-            ENDIF.
-
-            lv_length -= 1.
+          lv_length -= 1.
 
         ENDWHILE.
-      CATCH cx_root INTO DATA(lr_exc).
-      str_summ = 'error'.
+      CATCH cx_root INTO DATA(lr_exc). " TODO: variable is assigned but never used (ABAP cleaner)
+        str_summ = 'error'.
     ENDTRY.
-
 
     rv_str = str_summ.
   ENDMETHOD.
