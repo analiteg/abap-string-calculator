@@ -2,11 +2,12 @@ CLASS lcl_string_culc DEFINITION CREATE PRIVATE.
 
   PUBLIC SECTION.
     METHODS allign_strings
-      IMPORTING iv_str_1 TYPE string
-                iv_str_2 TYPE string
+      IMPORTING  iv_str_1 TYPE string
+                 iv_str_2 TYPE string
 
-      EXPORTING ev_str_1 TYPE string
-                ev_str_2 TYPE string.
+      EXPORTING  ev_str_1 TYPE string
+                 ev_str_2 TYPE string
+                ev_length TYPE i OPTIONAL .
 
     METHODS sum_strings
       IMPORTING iv_string_1   TYPE string
@@ -20,8 +21,13 @@ CLASS lcl_string_culc DEFINITION CREATE PRIVATE.
   PRIVATE SECTION.
     CLASS-DATA lo_instance TYPE REF TO lcl_string_culc.
 
-    DATA buf  TYPE string.
+    " not a requirement  DATA buf  TYPE string.
     DATA numb TYPE i VALUE 0.
+
+    CONSTANTS : lci_ten 	TYPE i VALUE 10 .
+    CONSTANTS : lci_zero 	TYPE i VALUE 0 .
+    CONSTANTS : lci_one 	TYPE i VALUE 1 .
+    CONSTANTS : lcs_zero 	TYPE string VALUE `0` .
 
 ENDCLASS.
 
@@ -34,71 +40,58 @@ CLASS lcl_string_culc IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD allign_strings.
-    DATA(str_1) = iv_str_1.
-    DATA(str_2) = iv_str_2.
-    DATA(char_diff) = strlen( str_1 ) - strlen( str_2 ).
+    FIELD-SYMBOLS: <fs_buf> . 
 
-    IF char_diff > 0.
-      buf = str_2.
-      DO abs( char_diff ) TIMES.
-        DATA(str_2_final) = insert( val = buf
-                                    sub = `0` ).
-        buf = str_2_final.
-      ENDDO.
-    ELSE.
-      buf = str_1.
-      DO abs( char_diff ) TIMES.
-        DATA(str_1_final) = insert( val = buf
-                                    sub = `0` ).
-        buf = str_1_final.
-      ENDDO.
+    ev_str_1 = iv_str_1 .
+    ev_str_2 = iv_str_2 .
+
+    DATA(chars_1)   = strlen( ev_str_1 ) .
+    DATA(chars_2)   = strlen( ev_str_2 ) .
+    DATA(char_diff) = chars_1 - chars_2 .
+    ev_length       = nmax( chars_1, chars_2 ) .
+
+    IF char_diff = lci_zero .			    " eq
+      return.
+    ELSEIF char_diff > lci_zero . 		" The second string is the shortest.  
+      ASSIGN ev_str_2 TO <fs_buf> .
+    ELSE.				                      " The first string is the shortest.
+      ASSIGN ev_str_1 TO <fs_buf> .
     ENDIF.
 
-    IF str_2_final IS NOT INITIAL.
-      ev_str_2 = str_2_final.
-    ELSE.
-      ev_str_2 = str_2.
-    ENDIF.
+    <fs_buf> = |{ <fs_buf> WIDTH = ev_length ALIGN = RIGHT PAD = lcs_zero }| .
 
-    IF str_1_final IS NOT INITIAL.
-      ev_str_1 = str_1_final.
-    ELSE.
-      ev_str_1 = str_1.
-    ENDIF.
   ENDMETHOD.
 
   METHOD sum_strings.
-    allign_strings( EXPORTING iv_str_1 = iv_string_1
-                              iv_str_2 = iv_string_2
+    allign_strings( EXPORTING  iv_str_1 = iv_string_1
+                               iv_str_2 = iv_string_2
 
-                    IMPORTING ev_str_1 = DATA(ev_string_1)
-                              ev_str_2 = DATA(ev_string_2) ).
+                    IMPORTING  ev_str_1 = DATA(ev_string_1)
+                               ev_str_2 = DATA(ev_string_2)
+                              ev_length = DATA(lv_length) ).
 
-    DATA(lv_length) = strlen( ev_string_1 ) - 1.
-    CLEAR buf.
+    lv_length = lv_length - lci_one.
+    DATA(buf) = `` .
     TRY.
-        WHILE lv_length >= 0.
+        WHILE lv_length >= lci_zero.
 
-          DATA(i_1) = CONV i( ev_string_1+lv_length(1) ).
-          DATA(i_2) = CONV i( ev_string_2+lv_length(1) ).
+          DATA(i_1) = CONV i( ev_string_1+lv_length(lci_one) ).
+          DATA(i_2) = CONV i( ev_string_2+lv_length(lci_one) ).
 
           DATA(summ) = i_1 + i_2 + numb.
 
-          IF ( summ ) < 10.
-            DATA(summ_str) = CONV string( summ ).
-            DATA(str_summ) = insert( val = buf
-                                     sub = summ_str ).
-            buf = str_summ.
-            numb = 0.
+          IF ( summ ) < lci_ten.
+            numb = lci_zero.
           ELSE.
-            summ_str = ( summ ) MOD 10.
-            str_summ = insert( val = buf
-                               sub = summ_str ).
-            buf = str_summ.
-            numb = 1.
+            summ = ( summ ) MOD lci_ten.
+            numb = lci_one.
           ENDIF.
 
-          lv_length -= 1.
+          DATA(summ_str) = CONV string( summ ).
+	  DATA(buf) = insert( val = buf
+	                      sub = summ_str ).
+
+          lv_length -= lci_one.
 
         ENDWHILE.
       CATCH cx_root INTO DATA(lr_exc).
