@@ -8,7 +8,7 @@ CLASS lcl_string_culc DEFINITION CREATE PRIVATE.
       EXPORTING ev_str_1 TYPE string
                 ev_str_2 TYPE string.
 
-    METHODS summ_strings
+    METHODS sum_strings
       IMPORTING iv_string_1   TYPE string
                 iv_string_2   TYPE string
 
@@ -67,7 +67,7 @@ CLASS lcl_string_culc IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD summ_strings.
+  METHOD sum_strings.
     allign_strings( EXPORTING iv_str_1 = iv_string_1
                               iv_str_2 = iv_string_2
 
