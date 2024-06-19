@@ -104,7 +104,7 @@ CLASS lcl_string_culc IMPLEMENTATION.
       CATCH cx_root INTO DATA(lr_exc).
         str_summ = 'error'.
     ENDTRY.
-
+    CONDENSE str_summ NO-GAPS.
     rv_str = str_summ.
   ENDMETHOD.
 ENDCLASS.
