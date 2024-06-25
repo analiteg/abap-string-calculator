@@ -91,20 +91,32 @@ CLASS lcl_string_culc IMPLEMENTATION.
             buf = str_summ.
             numb = 0.
           ELSE.
-            summ_str = ( summ ) MOD 10.
-            str_summ = insert( val = buf
-                               sub = summ_str ).
-            buf = str_summ.
-            numb = 1.
+
+            IF lv_length = 0.
+              DATA(summ_str_2) = CONV string( summ ).
+              str_summ = insert( val = buf
+                                   sub = summ_str_2 ).
+            ELSE.
+
+
+              DATA(summ_str_3) = CONV string( summ  MOD 10 ).
+
+              str_summ = insert( val = buf
+                                 sub = summ_str_3 ).
+              buf = str_summ.
+              numb = 1.
+            ENDIF.
           ENDIF.
 
           lv_length -= 1.
 
         ENDWHILE.
-      CATCH cx_root INTO DATA(lr_exc).
+      CATCH cx_root INTO DATA(lr_exc). " TODO: variable is assigned but never used (ABAP cleaner)
         str_summ = 'error'.
     ENDTRY.
-    CONDENSE str_summ NO-GAPS.
+    str_summ = condense( val  = str_summ
+                         from = ` `
+                         to   = `` ).
     rv_str = str_summ.
   ENDMETHOD.
 ENDCLASS.
